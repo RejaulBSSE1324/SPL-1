@@ -1,13 +1,10 @@
 // C Program to read a PGMB image
-// and print its parameters
-#include <ctype.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <ctype.h>
+#include <stdbool.h>
 
-// Structure for storing the
-// image data
+// Structure for storing the image data
 typedef struct PGMImage {
 	char pgmType[3];
 	unsigned char** data;
@@ -16,17 +13,14 @@ typedef struct PGMImage {
 	unsigned int maxValue;
 } PGMImage;
 
-// Function to ignore any comments
-// in file
+// Function to ignore any comments in file
 void ignoreComments(FILE* fp)
 {
-	int ch;
+	char ch;
 	char line[100];
 
 	// Ignore any blank lines
-	while ((ch = fgetc(fp)) != EOF
-		&& isspace(ch))
-		;
+	while ((ch = fgetc(fp)) != EOF && isspace(ch));
 
 	// Recursively ignore comments
 	// in a PGM image commented lines
@@ -41,13 +35,11 @@ void ignoreComments(FILE* fp)
 
 // Function to open the input a PGM
 // file and process it
-bool openPGM(PGMImage* pgm,
-			const char* filename)
+bool openPGM(PGMImage* pgm, const char* filename)
 {
 	// Open the image file in the
 	// 'read binary' mode
-	FILE* pgmfile
-		= fopen(filename, "rb");
+	FILE* pgmfile= fopen(filename, "rb");
 
 	// If file does not exist,
 	// then return
@@ -57,23 +49,21 @@ bool openPGM(PGMImage* pgm,
 	}
 
 	ignoreComments(pgmfile);
-	fscanf(pgmfile, "%s",
-		pgm->pgmType);
+	fscanf(pgmfile, "%s",pgm->pgmType);
+
+
 
 	// Check for correct PGM Binary
 	// file type
-	if (strcmp(pgm->pgmType, "P5")) {
-		fprintf(stderr,
-				"Wrong file type!\n");
+	if (pgm->pgmType[1]=='2') {
+		fprintf(stderr,"Wrong file type!\n");
 		exit(EXIT_FAILURE);
 	}
 
 	ignoreComments(pgmfile);
 
 	// Read the image dimensions
-	fscanf(pgmfile, "%d %d",
-		&(pgm->width),
-		&(pgm->height));
+	fscanf(pgmfile, "%d %d",&(pgm->width),&(pgm->height));
 
 	ignoreComments(pgmfile);
 
@@ -83,35 +73,24 @@ bool openPGM(PGMImage* pgm,
 
 	// Allocating memory to store
 	// img info in defined struct
-	pgm->data
-		=(unsigned char**) malloc(pgm->height
-				* sizeof(unsigned char*));
+	pgm->data=(unsigned char**) malloc(pgm->height* sizeof(unsigned char*));
 
-	// Storing the pixel info in
-	// the struct
+	// Storing the pixel info in the structure
 	if (pgm->pgmType[1] == '5') {
 
 		fgetc(pgmfile);
 
-		for (int i = 0;
-			i < pgm->height; i++) {
-			pgm->data[i]
-				=(unsigned char*) malloc(pgm->width
-						* sizeof(unsigned char));
+		for (int i = 0;i < pgm->height; i++) {
+			pgm->data[i]=(unsigned char*) malloc(pgm->width* sizeof(unsigned char));
 
-			// If memory allocation
-			// is failed
+			// If memory allocation is failed
 			if (pgm->data[i] == NULL) {
-				fprintf(stderr,
-						"malloc failed\n");
+				fprintf(stderr,"malloc failed\n");
 				exit(1);
 			}
 
-			// Read the gray values and
-			// write on allocated memory
-			fread(pgm->data[i],
-				sizeof(unsigned char),
-				pgm->width, pgmfile);
+			// Read the gray values and write on allocated memory
+			fread(pgm->data[i],sizeof(unsigned char),pgm->width, pgmfile);
 		}
 	}
 
@@ -122,8 +101,7 @@ bool openPGM(PGMImage* pgm,
 }
 
 // Function to print the file details
-void printImageDetails(PGMImage* pgm,
-					const char* filename,const char* filename2)
+void printImageDetails(PGMImage* pgm, const char* filename,const char* filename2)
 {
 	FILE* pgmfile = fopen(filename, "rb");
 	FILE* outputFile = fopen(filename2, "w");
@@ -131,29 +109,16 @@ void printImageDetails(PGMImage* pgm,
     {
         printf("Could not open file");
     }
-	// Retrieving the file extension
-    const char ch = '.';
-	const char* ext = strrchr(filename, ch);
-	if (!ext)
-		printf("No extension found"
-			"in file %s",
-			filename);
-	else
-		printf("File format"
-			" : %s\n",
-			ext + 1);
+
 
 	fprintf(outputFile,"PGM File type : %s\n",pgm->pgmType);
 
 	// Print type of PGM file, in ascii
 	// and binary format
-	if (!strcmp(pgm->pgmType, "P2"))
-		printf("PGM File Format:"
-			"ASCII\n");
-	else if (!strcmp(pgm->pgmType,
-					"P5"))
-		printf("PGM File Format:"
-			" Binary\n");
+	if (pgm->pgmType[1]=='2')
+		printf("PGM File Format: ASCII\n");
+	else if (pgm->pgmType[1]=='5')
+		printf("PGM File Format: Binary\n");
 
 	fprintf(outputFile,"Width of img : %d px\n",pgm->width);
 	fprintf(outputFile,"Height of img : %d px\n",pgm->height);
@@ -175,16 +140,16 @@ void printImageDetails(PGMImage* pgm,
 }
 
 // Driver Code
-int main(int argc, char const* argv[])
+int main()
 {
 	PGMImage* pgm =(PGMImage*) malloc(sizeof(PGMImage));
 	const char* ipfile;
 	const char* opfile;
 
-	if (argc == 2)
-		ipfile = argv[1];
-	else
-		ipfile = "cat.pgm";
+	// if (argc == 2)
+	// 	ipfile = argv[1];
+	// else
+	ipfile = "cat.pgm";
 
 	opfile = "cat.txt";
 	printf("\tip file : %s\n", ipfile);
