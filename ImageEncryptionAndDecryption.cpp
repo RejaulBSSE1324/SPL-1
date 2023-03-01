@@ -210,11 +210,7 @@ void sBox_substitution(char word[], int length) {
         word[i] = sbox[(int)word[i]];
     }
 }
-void inv_sBox_substitution(char word[], int length) {
-    for(int i=0 ; i<length ; i++) {
-        word[i] = inv_sbox[(int)word[i]];
-    }
-}
+
 
 void keyExpantion(unsigned char k[]) {
     const unsigned char roundConstant[10] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36};
@@ -305,11 +301,6 @@ void substituteByte(unsigned char plainText[]) {
     }
 }
 
-void inverseSubstituteByte(unsigned char plainText[]) {
-    for(int i=0 ; i<128 ; i++) {
-        plainText[i] = inv_sbox[plainText[i]];
-    }
-}
 
 void shiftRows(unsigned char plainText[]) {
     int i,j;
@@ -325,65 +316,7 @@ void shiftRows(unsigned char plainText[]) {
     }
 }
 
-void inverseRowsShift(unsigned char plainText[]) {
-    int i,j;
-    char ch;
-    for(i=1 ; i<4 ; i++) {
-        for(j=0 ; j<i ; j++) {
-            ch = plainText[i*4 + 3];
-            plainText[i*4+3] = plainText[i*4+2];
-            plainText[i*4+2] = plainText[i*4+1];
-            plainText[i*4+1] = plainText[i*4+0];
-            plainText[i*4+0] = ch;
-        }
-    }
-}
 
-void mixColumn(unsigned char plainText[]) {
-    unsigned char ch = NULL;
-    unsigned char matrix[4][4]={{0x02, 0x03, 0x01, 0x01},
-                                {0x01, 0x02, 0x03, 0x01},
-                                {0x01, 0x01, 0x02, 0x03},
-                                {0x03, 0x01, 0x01, 0x02} };
-    unsigned char tempStr[16];
-    int i,j,k;
-    for(i=0; i<4 ; i++) {
-        for(j=0; j<4 ; j++) {
-            ch = NULL;
-            for(k=0 ; k<4 ; k++) {
-                if((int)matrix[i][k] == 1)
-                    ch = ch ^ plainText[k*4 + j];
-                else
-                    ch = ch ^ mulTable[(int)matrix[i][k]][(int)plainText[k*4 + j]];
-            }
-            tempStr[i*4 + j] = ch;
-        }
-    }
-    for(i=0 ; i<16 ; i++) plainText[i] = tempStr[i];
-}
-
-void inverseMixColumn(unsigned char plainText[]) {
-    unsigned char ch = NULL;
-    unsigned char matrix[4][4]={{0x0E, 0x0B, 0x0D, 0x09},
-                                {0x09, 0x0E, 0x0B, 0x0D},
-                                {0x0D, 0x09, 0x0E, 0x0B},
-                                {0x0B, 0x0D, 0x09, 0x0E} };
-    unsigned char tempStr[16];
-    int i,j,k;
-    for(i=0; i<4 ; i++) {
-        for(j=0; j<4 ; j++) {
-            ch = NULL;
-            for(k=0 ; k<4 ; k++) {
-                if((int)matrix[i][k] == 1)
-                    ch = ch ^ plainText[k*4 + j];
-                else
-                    ch = ch ^ mulTable[(int)matrix[i][k]][(int)plainText[k*4 + j]];
-            }
-            tempStr[i*4 + j] = ch;
-        }
-    }
-    for(i=0 ; i<16 ; i++) plainText[i] = tempStr[i];
-}
 
 void print(unsigned char str[]) {
     for(int i=0 ; i<4 ; i++)
@@ -407,7 +340,7 @@ void encryption(unsigned char plainText[], int length) {
             else{
                 substituteByte(str);
                 shiftRows(str);
-                mixColumn(str);
+                //mixColumn(str);
                 addRoundKey(str,i*4);
             }
         }
@@ -416,38 +349,7 @@ void encryption(unsigned char plainText[], int length) {
 }
 
 
-void decryption(unsigned char cipherText[], int length) {
-    int i,j,k;
-    int decpRound = length/128;
-    unsigned char *str = cipherText;
 
-    for(k=0 ; k<decpRound ; k++){
-        addRoundKey(str,40);
-        for(i=1 ; i<=10 ; i++) {
-            if(i == 10) {
-                inverseRowsShift(str);
-                inverseSubstituteByte(str);
-                addRoundKey(str, 40-i*4);
-            }
-            else{
-                inverseRowsShift(str);
-                inverseSubstituteByte(str);
-                addRoundKey(str, 40-i*4);
-                inverseMixColumn(str);
-            }
-        }
-        str = str + 128;
-    }
-
-    for(i=length-1 ; i >= 0 ; i--) {
-        if(cipherText[i] != ' ') {
-            cipherText[i+1] = '\0';
-            break;
-        }
-    }
-
-
-}
 
 // Function to ignore any comments in file
 void ignoreComments(FILE* fp)
@@ -625,11 +527,6 @@ int main()
     encryption(message, totalPixel);
     cout << "\n\n\nCipherText: \n";
     for(int i=15000 ; i< totalPixel ; i++) cout << int(message[i]) << "  ";
-    cout <<"\n\n\n\n\n";
-
-    decryption(message, totalPixel);
-    cout << "\n\n\nPlainText: \n";
-    for(int i=15000 ; i<totalPixel ; i++) cout << int(message[i]) << "  ";
     cout <<"\n\n\n\n\n";
 
 
